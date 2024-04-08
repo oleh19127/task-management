@@ -24,7 +24,7 @@
     "*": [
       "prettier --write --ignore-unknown"
     ],
-    "*.{ts}": [
+    "*.ts": [
       "eslint  --fix"
     ]
   },
