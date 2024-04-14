@@ -20,6 +20,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "lint-staged": {
     "*": [
       "prettier --write --ignore-unknown"
