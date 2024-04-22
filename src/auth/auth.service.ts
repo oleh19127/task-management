@@ -1,13 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    private readonly logger: Logger,
   ) {}
 
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
@@ -16,6 +18,10 @@ export class AuthService {
       password,
       userName,
     });
-    await this.userRepository.save(newUser);
+    try {
+      await this.userRepository.save(newUser);
+    } catch (error) {
+      throw new ConflictException(error.message);
+    }
   }
 }
