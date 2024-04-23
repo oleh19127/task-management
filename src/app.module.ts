@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import type { DbType } from 'types/dbType';
 import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from 'nestjs-pino';
+import { PasswordToolService } from './password-tools/password-tool.service';
 
 @Module({
   imports: [
@@ -35,6 +36,6 @@ import { LoggerModule } from 'nestjs-pino';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PasswordToolService],
 })
 export class AppModule {}
