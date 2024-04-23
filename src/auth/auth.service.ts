@@ -9,6 +9,8 @@ import { Repository } from 'typeorm';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { Logger } from 'nestjs-pino';
 import { PasswordToolService } from 'src/password-tools/password-tool.service';
+import { JwtService } from '@nestjs/jwt';
+import type { IJWtPayload } from './jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +18,7 @@ export class AuthService {
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly logger: Logger,
     private passwordToolService: PasswordToolService,
+    private jwtService: JwtService,
   ) {}
 
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
@@ -34,7 +37,9 @@ export class AuthService {
     }
   }
 
-  async signIn(authCredentialsDto: AuthCredentialsDto): Promise<string> {
+  async signIn(
+    authCredentialsDto: AuthCredentialsDto,
+  ): Promise<{ accessToken: string }> {
     const { password, userName } = authCredentialsDto;
     const user = await this.userRepository.findOneBy({ userName });
     const verifiedPassword = await this.passwordToolService.verifyPassword(
@@ -42,7 +47,9 @@ export class AuthService {
       password,
     );
     if (user && verifiedPassword) {
-      return 'Success';
+      const payload: IJWtPayload = { userName };
+      const accessToken = await this.jwtService.signAsync(payload);
+      return { accessToken };
     } else {
       throw new UnauthorizedException('Please check you credentials');
     }
