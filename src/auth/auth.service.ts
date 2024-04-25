@@ -1,13 +1,13 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
-import { Logger } from 'nestjs-pino';
 import { PasswordToolService } from 'src/password-tools/password-tool.service';
 import { JwtService } from '@nestjs/jwt';
 import type { IJWtPayload } from './jwt-payload.interface';
@@ -16,10 +16,11 @@ import type { IJWtPayload } from './jwt-payload.interface';
 export class AuthService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    private readonly logger: Logger,
     private passwordToolService: PasswordToolService,
     private jwtService: JwtService,
   ) {}
+
+  private readonly logger = new Logger(AuthService.name, { timestamp: true });
 
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
     const { password, userName } = authCredentialsDto;
@@ -31,6 +32,9 @@ export class AuthService {
     });
     try {
       await this.userRepository.save(newUser);
+      this.logger.verbose(
+        `Successfully saved User: ${JSON.stringify(newUser.userName)}`,
+      );
     } catch (error) {
       this.logger.error(error.message);
       throw new ConflictException(error.message);
@@ -49,8 +53,12 @@ export class AuthService {
     if (user && verifiedPassword) {
       const payload: IJWtPayload = { userName };
       const accessToken = await this.jwtService.signAsync(payload);
+      this.logger.verbose(
+        `Successfully sign in for user: ${JSON.stringify(user.userName)}`,
+      );
       return { accessToken };
     } else {
+      this.logger.error('Please check you credentials');
       throw new UnauthorizedException('Please check you credentials');
     }
   }

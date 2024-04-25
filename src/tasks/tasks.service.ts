@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -13,6 +19,8 @@ export class TasksService {
     @InjectRepository(Task) private taskRepository: Repository<Task>,
   ) {}
 
+  private readonly logger = new Logger(TasksService.name, { timestamp: true });
+
   async getAllTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
     const { search, status } = filterDto;
     const query = this.taskRepository.createQueryBuilder('task');
@@ -26,15 +34,23 @@ export class TasksService {
         { search: `%${search}%` },
       );
     }
-    const tasks = await query.getMany();
-    return tasks;
+    try {
+      const tasks = await query.getMany();
+      this.logger.verbose(`Tasks: ${JSON.stringify(tasks)} found successfully`);
+      return tasks;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async getTaskById(id: string, user: User): Promise<Task> {
     const found = await this.taskRepository.findOneBy({ id, user });
     if (!found) {
+      this.logger.error(`Task with id: ${id} not found`);
       throw new NotFoundException(`Task with id: ${id} not found`);
     }
+    this.logger.verbose(`Task with id: ${id} successfully found`);
     return found;
   }
 
@@ -45,26 +61,41 @@ export class TasksService {
       description,
       user,
     });
-    await this.taskRepository.save(newTask);
-    return newTask;
+    try {
+      await this.taskRepository.save(newTask);
+      this.logger.verbose(
+        `Task for user: ${JSON.stringify(user.userName)} successfully created`,
+      );
+      return newTask;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new ConflictException(error.message);
+    }
   }
 
   async deleteTaskById(id: string, user: User): Promise<void> {
     const result = await this.taskRepository.delete({ id, user });
     if (result.affected === 0) {
+      this.logger.error(`Task with id: ${id} not found`);
       throw new NotFoundException(`Task with id: ${id} not found`);
     }
+    this.logger.verbose(`Task with id: ${id} successfully deleted`);
   }
 
   async updateTaskStatus(
     id: string,
     status: TaskStatus,
-
     user: User,
   ): Promise<Task> {
     const taskToUpdate = await this.getTaskById(id, user);
     taskToUpdate.status = status;
-    await this.taskRepository.save(taskToUpdate);
-    return taskToUpdate;
+    try {
+      await this.taskRepository.save(taskToUpdate);
+      this.logger.verbose(`Task with id: ${id} successfully updated`);
+      return taskToUpdate;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 }
