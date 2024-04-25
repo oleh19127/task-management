@@ -40,8 +40,11 @@ export class TasksController {
   }
 
   @Get('/:id')
-  async getTaskById(@Param('id') id: string): Promise<Task> {
-    return this.tasksService.getTaskById(id);
+  async getTaskById(
+    @Param('id') id: string,
+    @GetUser() user: User,
+  ): Promise<Task> {
+    return this.tasksService.getTaskById(id, user);
   }
 
   @Delete('/:id')
