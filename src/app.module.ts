@@ -3,8 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TasksModule } from './tasks/tasks.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-import type { DbType } from 'types/dbType';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { PasswordToolService } from './password-tools/password-tool.service';
 
@@ -12,15 +11,19 @@ import { PasswordToolService } from './password-tools/password-tool.service';
   imports: [
     ConfigModule.forRoot(),
     TasksModule,
-    TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as DbType,
-      host: process.env.POSTGRES_HOST,
-      database: process.env.POSTGRES_DB,
-      port: parseInt(process.env.PORT, 10),
-      password: process.env.POSTGRES_PASSWORD,
-      username: process.env.POSTGRES_USER,
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('POSTGRES_HOST'),
+        database: configService.get('POSTGRES_DB'),
+        port: parseInt(configService.get('POSTGRES_PORT'), 10),
+        password: configService.get('POSTGRES_PASSWORD'),
+        username: configService.get('POSTGRES_USER'),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
     }),
     AuthModule,
   ],
