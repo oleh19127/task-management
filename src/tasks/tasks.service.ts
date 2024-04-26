@@ -36,7 +36,6 @@ export class TasksService {
     }
     try {
       const tasks = await query.getMany();
-      this.logger.verbose(`Tasks: ${JSON.stringify(tasks)} found successfully`);
       return tasks;
     } catch (error) {
       this.logger.error(error.message);
@@ -50,7 +49,6 @@ export class TasksService {
       this.logger.error(`Task with id: ${id} not found`);
       throw new NotFoundException(`Task with id: ${id} not found`);
     }
-    this.logger.verbose(`Task with id: ${id} successfully found`);
     return found;
   }
 
@@ -62,7 +60,7 @@ export class TasksService {
       user,
     });
     try {
-      await this.taskRepository.save(newTask);
+      await this.taskRepository.insert(newTask);
       this.logger.verbose(
         `Task for user: ${JSON.stringify(user.userName)} successfully created`,
       );
@@ -79,7 +77,6 @@ export class TasksService {
       this.logger.error(`Task with id: ${id} not found`);
       throw new NotFoundException(`Task with id: ${id} not found`);
     }
-    this.logger.verbose(`Task with id: ${id} successfully deleted`);
   }
 
   async updateTaskStatus(
@@ -91,7 +88,6 @@ export class TasksService {
     taskToUpdate.status = status;
     try {
       await this.taskRepository.save(taskToUpdate);
-      this.logger.verbose(`Task with id: ${id} successfully updated`);
       return taskToUpdate;
     } catch (error) {
       this.logger.error(error.message);

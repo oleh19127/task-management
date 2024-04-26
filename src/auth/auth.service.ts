@@ -31,10 +31,7 @@ export class AuthService {
       userName,
     });
     try {
-      await this.userRepository.save(newUser);
-      this.logger.verbose(
-        `Successfully saved User: ${JSON.stringify(newUser.userName)}`,
-      );
+      await this.userRepository.insert(newUser);
     } catch (error) {
       this.logger.error(error.message);
       throw new ConflictException(error.message);
@@ -53,9 +50,6 @@ export class AuthService {
     if (user && verifiedPassword) {
       const payload: IJWtPayload = { userName };
       const accessToken = await this.jwtService.signAsync(payload);
-      this.logger.verbose(
-        `Successfully sign in for user: ${JSON.stringify(user.userName)}`,
-      );
       return { accessToken };
     } else {
       this.logger.error('Please check you credentials');
