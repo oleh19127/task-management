@@ -7,18 +7,24 @@ import { PasswordToolService } from 'src/password-tools/password-tool.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   providers: [AuthService, PasswordToolService, JwtStrategy],
   controllers: [AuthController],
   imports: [
+    ConfigModule,
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: 'secret',
-      signOptions: {
-        expiresIn: 7200,
-      },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET'),
+        signOptions: {
+          expiresIn: 7200,
+        },
+      }),
     }),
   ],
   exports: [JwtStrategy, PassportModule],
