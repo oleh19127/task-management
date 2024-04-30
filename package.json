@@ -42,9 +42,13 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "husky": "^9.0.11",
+    "nestjs-pino": "^4.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.11.5",
+    "pino": "^9.0.0",
+    "pino-http": "^9.0.0",
+    "pino-pretty": "^11.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20"
