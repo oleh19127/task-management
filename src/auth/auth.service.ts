@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
-import { PasswordToolService } from 'src/password-tools/password-tool.service';
+import { PasswordToolService } from '../password-tools/password-tool.service';
 import { JwtService } from '@nestjs/jwt';
 import type { IJWtPayload } from './jwt-payload.interface';
 

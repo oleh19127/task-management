@@ -11,7 +11,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskStatus } from './task-status.enum';
 import { Repository } from 'typeorm';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
-import { User } from 'src/auth/user.entity';
+import { User } from '../auth/user.entity';
 
 @Injectable()
 export class TasksService {

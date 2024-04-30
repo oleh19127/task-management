@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TasksModule } from './tasks/tasks.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -27,7 +25,7 @@ import { PasswordToolService } from './password-tools/password-tool.service';
     }),
     AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, PasswordToolService],
+  controllers: [],
+  providers: [PasswordToolService],
 })
 export class AppModule {}
