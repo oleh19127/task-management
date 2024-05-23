@@ -1,60 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { TaskStatus, type ITask } from './task.module';
-import { v4 as uuid } from 'uuid';
-import type { CreateTaskDto } from './dto/create-task.dto';
-import type { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Task } from './task.entity';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { TaskStatus } from './task-status.enum';
+import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { User } from '../auth/user.entity';
+import { TasksRepository } from './tasks.repository';
 
 @Injectable()
 export class TasksService {
-  private tasks: ITask[] = [];
+  constructor(
+    @InjectRepository(TasksRepository) private tasksRepository: TasksRepository,
+  ) {}
 
-  getAllTasks() {
-    return this.tasks;
+  async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
+    return this.tasksRepository.getTasks(filterDto, user);
   }
 
-  getTasksWithFilters(filterDto: GetTasksFilterDto): ITask[] {
-    const { status, search } = filterDto;
-    let tasks = this.getAllTasks();
-    if (status) {
-      tasks = tasks.filter((task) => task.status === status);
-    }
-    if (search) {
-      tasks = tasks.filter((task) => {
-        if (
-          task.title.toLowerCase().includes(search.toLowerCase()) ||
-          task.description.toLowerCase().includes(search.toLowerCase())
-        ) {
-          return true;
-        }
-        return false;
-      });
-    }
-    return tasks;
+  async getTaskById(id: string, user: User): Promise<Task> {
+    return this.tasksRepository.getTaskById(id, user);
   }
 
-  getTaskById(id: string): ITask {
-    return this.tasks.find((task) => id === task.id);
+  async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
+    return this.tasksRepository.createTask(createTaskDto, user);
   }
 
-  createTask(createTaskDto: CreateTaskDto): ITask {
-    const { title, description } = createTaskDto;
-    const task: ITask = {
-      id: uuid(),
-      title,
-      description,
-      status: TaskStatus.OPEN,
-    };
-    this.tasks.push(task);
-    return task;
+  async deleteTaskById(id: string, user: User): Promise<void> {
+    return this.tasksRepository.deleteTaskById(id, user);
   }
 
-  deleteTaskById(id: string): void {
-    this.tasks = this.tasks.filter((task) => task.id !== id);
-  }
-
-  updateTaskStatus(id: string, status: TaskStatus): ITask {
-    const task = this.getTaskById(id);
-    task.status = status;
-    return task;
+  async updateTaskStatus(
+    id: string,
+    status: TaskStatus,
+    user: User,
+  ): Promise<Task> {
+    return this.tasksRepository.updateTaskStatus(id, status, user);
   }
 }

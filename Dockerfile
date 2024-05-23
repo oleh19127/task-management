@@ -1,6 +1,7 @@
 FROM node:20.12.2-alpine as base
 WORKDIR /app
 EXPOSE 3000
+RUN npm up -g
 
 FROM base as prod
 RUN --mount=type=bind,source=package.json,target=package.json \

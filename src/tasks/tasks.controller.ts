@@ -7,45 +7,61 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { ITask, type TaskStatus } from './task.module';
-import type { CreateTaskDto } from './dto/create-task.dto';
-import type { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { Task } from './task.entity';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
+import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from '../auth/get-user.decorator';
+import { User } from '../auth/user.entity';
 
 @Controller('tasks')
+@UseGuards(AuthGuard())
 export class TasksController {
   constructor(private tasksService: TasksService) {}
 
   @Get()
-  getTasks(@Query() filterDto: GetTasksFilterDto): ITask[] {
-    if (Object.keys(filterDto).length) {
-      return this.tasksService.getTasksWithFilters(filterDto);
-    } else {
-      return this.tasksService.getAllTasks();
-    }
+  async getTasks(
+    @Query() filterDto: GetTasksFilterDto,
+    @GetUser() user: User,
+  ): Promise<Task[]> {
+    return this.tasksService.getTasks(filterDto, user);
   }
 
   @Post()
-  createTask(@Body() createTaskDto: CreateTaskDto): ITask {
-    return this.tasksService.createTask(createTaskDto);
+  async createTask(
+    @Body() createTaskDto: CreateTaskDto,
+    @GetUser() user: User,
+  ): Promise<Task> {
+    return this.tasksService.createTask(createTaskDto, user);
   }
 
   @Get('/:id')
-  getTaskById(@Param('id') id: string): ITask {
-    return this.tasksService.getTaskById(id);
+  async getTaskById(
+    @Param('id') id: string,
+    @GetUser() user: User,
+  ): Promise<Task> {
+    return this.tasksService.getTaskById(id, user);
   }
 
   @Delete('/:id')
-  deleteTaskById(@Param('id') id: string): void {
-    return this.tasksService.deleteTaskById(id);
+  async deleteTaskById(
+    @Param('id') id: string,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.tasksService.deleteTaskById(id, user);
   }
 
   @Patch('/:id/status')
-  updateTaskStatus(
+  async updateTaskStatus(
     @Param('id') id: string,
-    @Body('status') status: TaskStatus,
-  ): ITask {
-    return this.tasksService.updateTaskStatus(id, status);
+    @Body() updateTaskStatusDto: UpdateTaskStatusDto,
+    @GetUser() user: User,
+  ): Promise<Task> {
+    const { status } = updateTaskStatusDto;
+    return this.tasksService.updateTaskStatus(id, status, user);
   }
 }
