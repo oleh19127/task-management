@@ -23,7 +23,7 @@ import { User } from '../auth/user.entity';
 export class TasksController {
   constructor(private tasksService: TasksService) {}
 
-  @Get()
+  @Get('/')
   async getTasks(
     @Query() filterDto: GetTasksFilterDto,
     @GetUser() user: User,
@@ -31,7 +31,7 @@ export class TasksController {
     return this.tasksService.getTasks(filterDto, user);
   }
 
-  @Post()
+  @Post('/')
   async createTask(
     @Body() createTaskDto: CreateTaskDto,
     @GetUser() user: User,
