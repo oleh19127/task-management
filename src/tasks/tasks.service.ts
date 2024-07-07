@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskStatus } from './enums/task-status.enum';
@@ -13,20 +19,41 @@ export class TasksService {
     @InjectRepository(TasksRepository) private tasksRepository: TasksRepository,
   ) {}
 
+  private readonly logger = new Logger(TasksRepository.name);
+
   async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
-    return this.tasksRepository.getTasks(filterDto, user);
+    try {
+      return this.tasksRepository.getTasks(filterDto, user);
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   async getTaskById(id: string, user: User): Promise<Task> {
-    return this.tasksRepository.getTaskById(id, user);
+    const found = await this.tasksRepository.getTaskById(id, user);
+    if (!found) {
+      this.logger.error(`Task with id: ${id} not found`);
+      throw new NotFoundException(`Task with id: ${id} not found`);
+    }
+    return found;
   }
 
   async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
-    return this.tasksRepository.createTask(createTaskDto, user);
+    try {
+      return this.tasksRepository.createTask(createTaskDto, user);
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new ConflictException(error.message);
+    }
   }
 
   async deleteTaskById(id: string, user: User): Promise<void> {
-    return this.tasksRepository.deleteTaskById(id, user);
+    const deletedTask = await this.tasksRepository.deleteTaskById(id, user);
+    if (deletedTask.affected === 0) {
+      this.logger.error(`Task with id: ${id} not found`);
+      throw new NotFoundException(`Task with id: ${id} not found`);
+    }
   }
 
   async updateTaskStatus(
@@ -34,6 +61,11 @@ export class TasksService {
     status: TaskStatus,
     user: User,
   ): Promise<Task> {
-    return this.tasksRepository.updateTaskStatus(id, status, user);
+    try {
+      return this.tasksRepository.updateTaskStatus(id, status, user);
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 }

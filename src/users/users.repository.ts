@@ -15,7 +15,7 @@ export class UserRepository extends Repository<User> {
     );
   }
 
-  async createNewUser(userName: string, password: string) {
+  async createNewUser(userName: string, password: string): Promise<void> {
     const newUser = this.create({
       password,
       userName,
