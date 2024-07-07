@@ -36,9 +36,7 @@ export class UsersService {
     return this.userRepository.createNewUser(userName, hashedPassword);
   }
 
-  async signIn(
-    authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ accessToken: string }> {
+  async signIn(authCredentialsDto: AuthCredentialsDto): Promise<string> {
     const { password, userName } = authCredentialsDto;
     const user = await this.userRepository.findOneByName(userName);
     if (!user) {
@@ -52,7 +50,7 @@ export class UsersService {
     if (verifiedPassword) {
       const payload: IJWtPayload = { userName };
       const accessToken = await this.jwtService.signAsync(payload);
-      return { accessToken };
+      return accessToken;
     } else {
       this.logger.error('Password is incorrect');
       throw new UnauthorizedException('Password is incorrect');

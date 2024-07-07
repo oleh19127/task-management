@@ -10,9 +10,7 @@ export class AuthService {
     return this.userService.signUp(authCredentialsDto);
   }
 
-  async signIn(
-    authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ accessToken: string }> {
+  async signIn(authCredentialsDto: AuthCredentialsDto): Promise<string> {
     return this.userService.signIn(authCredentialsDto);
   }
 }
