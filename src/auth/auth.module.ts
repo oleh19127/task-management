@@ -4,11 +4,11 @@ import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserRepository } from './user.repository';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { UtilityModule } from 'src/utility/utils.module';
+import { JwtStrategy } from './strategy/jwt.strategy';
 
 @Module({
   providers: [AuthService, JwtStrategy, UserRepository],

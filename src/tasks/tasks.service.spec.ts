@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { TaskStatus } from './task-status.enum';
+import { TaskStatus } from './enums/task-status.enum';
 import { TasksRepository } from './tasks.repository';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';

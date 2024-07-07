@@ -10,7 +10,7 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { UserRepository } from './user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordToolService } from 'src/utility/password-tool.service';
-import { IJWtPayload } from './jwt-payload.interface';
+import { IJWtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
