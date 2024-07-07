@@ -1,17 +1,11 @@
-import {
-  ConflictException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
-import { Task } from './task.entity';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { Repository, type UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../auth/user.entity';
+import { User } from '../users/entities/user.entity';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { TaskStatus } from './task-status.enum';
+import { TaskStatus } from './enums/task-status.enum';
+import { Task } from './entities/task.entity';
 
 @Injectable()
 export class TasksRepository extends Repository<Task> {
@@ -24,7 +18,6 @@ export class TasksRepository extends Repository<Task> {
       tasksRepository.queryRunner,
     );
   }
-  private readonly logger = new Logger(TasksRepository.name);
 
   async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
     const { search, status } = filterDto;
@@ -39,22 +32,12 @@ export class TasksRepository extends Repository<Task> {
         { search: `%${search}%` },
       );
     }
-    try {
-      const tasks = await query.getMany();
-      return tasks;
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new InternalServerErrorException(error.message);
-    }
+    const tasks = await query.getMany();
+    return tasks;
   }
 
   async getTaskById(id: string, user: User): Promise<Task> {
-    const found = await this.findOneBy({ id, user });
-    if (!found) {
-      this.logger.error(`Task with id: ${id} not found`);
-      throw new NotFoundException(`Task with id: ${id} not found`);
-    }
-    return found;
+    return this.findOneBy({ id, user });
   }
 
   async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
@@ -64,24 +47,12 @@ export class TasksRepository extends Repository<Task> {
       description,
       user,
     });
-    try {
-      await this.insert(newTask);
-      this.logger.verbose(
-        `Task for user: ${JSON.stringify(user.userName)} successfully created`,
-      );
-      return newTask;
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new ConflictException(error.message);
-    }
+    await this.insert(newTask);
+    return newTask;
   }
 
-  async deleteTaskById(id: string, user: User): Promise<void> {
-    const result = await this.softDelete({ id, user });
-    if (result.affected === 0) {
-      this.logger.error(`Task with id: ${id} not found`);
-      throw new NotFoundException(`Task with id: ${id} not found`);
-    }
+  async deleteTaskById(id: string, user: User): Promise<UpdateResult> {
+    return this.softDelete({ id, user });
   }
 
   async updateTaskStatus(
@@ -91,12 +62,7 @@ export class TasksRepository extends Repository<Task> {
   ): Promise<Task> {
     const taskToUpdate = await this.getTaskById(id, user);
     taskToUpdate.status = status;
-    try {
-      await this.save(taskToUpdate);
-      return taskToUpdate;
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new InternalServerErrorException(error.message);
-    }
+    await this.save(taskToUpdate);
+    return taskToUpdate;
   }
 }

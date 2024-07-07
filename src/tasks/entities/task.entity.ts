@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { TaskStatus } from './task-status.enum';
-import { User } from '../auth/user.entity';
+import { TaskStatus } from '../enums/task-status.enum';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class Task {

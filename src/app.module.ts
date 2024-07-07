@@ -3,8 +3,8 @@ import { TasksModule } from './tasks/tasks.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { PasswordToolService } from './utils/password-tools/password-tool.service';
 import { LoggerModule } from 'nestjs-pino';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -35,8 +35,9 @@ import { LoggerModule } from 'nestjs-pino';
       }),
     }),
     AuthModule,
+    UsersModule,
   ],
   controllers: [],
-  providers: [PasswordToolService],
+  providers: [],
 })
 export class AppModule {}
