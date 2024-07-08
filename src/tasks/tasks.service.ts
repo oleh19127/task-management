@@ -19,7 +19,7 @@ export class TasksService {
     @InjectRepository(TasksRepository) private tasksRepository: TasksRepository,
   ) {}
 
-  private readonly logger = new Logger(TasksRepository.name);
+  private readonly logger = new Logger(TasksService.name);
 
   async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
     try {
